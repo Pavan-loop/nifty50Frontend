@@ -1,0 +1,68 @@
+.parent{
+    -fx-background-color: white;
+}
+.sidebar{
+    -fx-background-color: #2D3039;
+}
+
+.main-heading{
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent gray transparent;
+    -fx-border-width: 0 0 2px 0;
+}
+.heading{
+    -fx-font-family: "Roboto";
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.selected {
+    -fx-background-color: white;
+    -fx-border-color: white;
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+}
+.un-selected {
+    -fx-background-color: white;
+    -fx-border-color: white;
+    -fx-font-weight: bold;
+    -fx-text-fill: #BDBDBD;
+}
+.table-view {
+    -fx-border-color: gray;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.table-view .column-header {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent gray transparent;
+    -fx-border-width: 0px 0px 1px 0px;
+    -fx-background-color: transparent;
+}
+.table-tl-parent{
+    -fx-border-radius: 10px;
+    -fx-border-color: transparent;
+}
+.table-view .filler {
+    -fx-background-color: transparent;
+}
+.table-view .column-header .label {
+    -fx-padding: 8px 0;
+}
+.table-view .table-row-cell {
+    -fx-text-fill: black;
+    -fx-border-color: transparent transparent gray transparent;
+    -fx-border-width: 0px 0px 1px 0px;
+}
+.table-view .table-cell{
+    -fx-padding: 8px 0;
+    -fx-alignment: center;
+}
+.table-view .column-header-background {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+

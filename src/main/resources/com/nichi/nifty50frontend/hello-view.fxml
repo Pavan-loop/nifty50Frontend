@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="580.0" prefWidth="1000.0" styleClass="parent" stylesheets="@../../../css/stylesheet.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nichi.nifty50frontend.HelloController">
+   <children>
+      <Pane prefHeight="50.0" prefWidth="1000.0" styleClass="main-heading" stylesheets="@../../../css/stylesheet.css">
+         <children>
+            <Label layoutX="163.0" layoutY="11.0" prefHeight="29.0" prefWidth="157.0" styleClass="heading" stylesheets="@../../../css/stylesheet.css" text=" NichiIn PL Monitor Tool" textFill="#030303">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font></Label>
+            <ImageView fitHeight="35.0" fitWidth="129.0" layoutX="21.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../images/logo.png" />
+               </image>
+            </ImageView>
+            <Button fx:id="buttonTL" layoutX="802.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleTLClick" prefHeight="27.0" prefWidth="61.0" styleClass="btn" stylesheets="@../../../css/stylesheet.css" text="TL" />
+            <Button fx:id="buttonTradeEntry" layoutX="892.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleTradeEntry" prefHeight="27.0" prefWidth="82.0" styleClass="btn" stylesheets="@../../../css/stylesheet.css" text="TradeEntry" />
+         </children>
+      </Pane>
+      <AnchorPane fx:id="contentArea" layoutX="23.0" layoutY="50.0" prefHeight="509.0" prefWidth="954.0" styleClass="table-tl-parent" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="23.0" />
+   </children>
+</AnchorPane>

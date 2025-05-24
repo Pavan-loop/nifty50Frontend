@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane styleClass="table-tl-parent" prefHeight="454.0" prefWidth="950.0" xmlns="http://javafx.com/javafx/17.0.6" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nichi.nifty50frontend.controller.TLViewController">
+   <children>
+      <TableView fx:id="tableTL"
+      AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+      >
+        <columns>
+          <TableColumn fx:id="colStocks" text="Stocks" />
+          <TableColumn fx:id="colName" text="Name" />
+          <TableColumn fx:id="colPosition" text="Position(T)" />
+          <TableColumn fx:id="colPrePosition" text="Position(T-1)" />
+          <TableColumn fx:id="colTradePrice" text="TradePrice" />
+          <TableColumn fx:id="colCashflow" text="Cashflow" />
+          <TableColumn fx:id="colPrice" text="Price(T)" />
+          <TableColumn fx:id="colPrePrice" text="Price(T-1)" />
+          <TableColumn fx:id="colPerChange" text="per change" />
+          <TableColumn fx:id="colPL" text="PL" />
+          <TableColumn fx:id="colPricePL" text="PricePL" />
+          <TableColumn fx:id="colTradePL" text="TradePL" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

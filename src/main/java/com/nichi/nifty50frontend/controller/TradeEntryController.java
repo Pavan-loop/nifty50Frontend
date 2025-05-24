@@ -1,0 +1,195 @@
+package com.nichi.nifty50frontend.controller;
+
+import com.nichi.nifty50frontend.DTO.TradeEntryDTO;
+import com.nichi.nifty50frontend.model.TableTradeEntry;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
+import java.util.List;
+
+public class TradeEntryController {
+
+    @FXML
+    private TableView<TableTradeEntry> tableTradeEntry;
+    @FXML
+    private Button saveBtn;
+
+    @FXML
+    private TableColumn<TableTradeEntry, Integer> colTradeNo;
+    @FXML
+    private TableColumn<TableTradeEntry, String> colCode;
+    @FXML
+    private TableColumn<TableTradeEntry, String> colName;
+    @FXML
+    private TableColumn<TableTradeEntry, String> colTradeDate;
+    @FXML
+    private TableColumn<TableTradeEntry, String> colSide;
+    @FXML
+    private TableColumn<TableTradeEntry, Integer> colTradePrice;
+    @FXML
+    private TableColumn<TableTradeEntry, Integer> colQuantity;
+
+    private final ObservableList<TableTradeEntry> tradeData = FXCollections.observableArrayList();
+
+    @FXML
+    public void initialize() {
+        tableTradeEntry.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tableTradeEntry.setItems(tradeData);
+        tableTradeEntry.setEditable(true);
+
+        colTradeNo.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTradeNo()).asObject());
+        colTradeNo.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
+        colTradeNo.setOnEditCommit(event -> event.getRowValue().setTradeNo(event.getNewValue()));
+
+        colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
+        colCode.setCellFactory(ComboBoxTableCell.forTableColumn("TATA", "HCL"));
+        colCode.setOnEditCommit(event -> event.getRowValue().setCode(event.getNewValue()));
+
+        colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
+        colName.setCellFactory(TextFieldTableCell.forTableColumn());
+        colName.setOnEditCommit(event -> event.getRowValue().setName(event.getNewValue()));
+
+        colTradeDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTradeDate()));
+        colTradeDate.setOnEditCommit(event -> event.getRowValue().setTradeDate(event.getNewValue()));
+
+        colSide.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getSide()));
+        colSide.setCellFactory(ComboBoxTableCell.forTableColumn("B","S"));
+        colSide.setOnEditCommit(event -> event.getRowValue().setSide(event.getNewValue()));
+
+        colTradePrice.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTradePrice()).asObject());
+        colTradePrice.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
+        colTradePrice.setOnEditCommit(event -> event.getRowValue().setTradePrice(event.getNewValue()));
+
+        colQuantity.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getQuantity()).asObject());
+        colQuantity.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
+        colQuantity.setOnEditCommit(event -> event.getRowValue().setQuantity(event.getNewValue()));
+
+        tableTradeEntry.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.TAB) {
+                TablePosition<?, ?> pos = tableTradeEntry.getFocusModel().getFocusedCell();
+                if (pos != null) {
+                    int colIndex = pos.getColumn();
+                    int rowIndex = pos.getRow();
+                    int totalCols = tableTradeEntry.getColumns().size();
+
+                    int nextColIndex = (colIndex + 1) % totalCols;
+
+                    tableTradeEntry.edit(rowIndex, tableTradeEntry.getColumns().get(nextColIndex));
+
+
+                    Platform.runLater(() -> {
+                        tableTradeEntry.getSelectionModel().select(rowIndex);
+                        tableTradeEntry.getFocusModel().focus(rowIndex, tableTradeEntry.getColumns().get(nextColIndex));
+                        tableTradeEntry.edit(rowIndex, tableTradeEntry.getColumns().get(nextColIndex));
+                    });
+                    event.consume();
+                }
+            }
+        });
+
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem addItem = new MenuItem("Add");
+        addItem.setOnAction(e -> {
+            TableTradeEntry newEntry = new TableTradeEntry(0, "", "", "", "", 0, 0);
+            tradeData.add(newEntry);
+            int newIndex = tradeData.size() - 1;
+            tableTradeEntry.scrollTo(newIndex);
+            tableTradeEntry.getSelectionModel().select(newIndex);
+            tableTradeEntry.layout();
+            tableTradeEntry.edit(newIndex, colTradeNo);  // start editing first column in new row
+        });
+
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> {
+            TableTradeEntry selected = tableTradeEntry.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                tradeData.remove(selected);
+            }
+        });
+
+        contextMenu.getItems().addAll(addItem, deleteItem);
+
+        tableTradeEntry.setContextMenu(contextMenu);
+
+        tableTradeEntry.setRowFactory(tv -> {
+            TableRow<TableTradeEntry> row = new TableRow<>();
+            row.setOnContextMenuRequested(event -> {
+                if (!row.isEmpty()) {
+                    tableTradeEntry.getSelectionModel().select(row.getIndex());
+                }
+            });
+            return row;
+        });
+
+        deleteItem.setOnAction(e -> {
+            TableTradeEntry selected = tableTradeEntry.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Deleted Selected row?", ButtonType.YES, ButtonType.NO);
+                alert.showAndWait().ifPresent(response -> {
+                    if (response == ButtonType.YES){
+                        tradeData.remove(selected);
+                    }
+                });
+            }
+        });
+
+        colTradeDate.setCellFactory(column -> new TableCell<TableTradeEntry, String>() {
+            private final DatePicker datePicker = new DatePicker();
+            {
+                datePicker.setOnAction(event -> {
+                    int row = getIndex();
+                    TableTradeEntry item = getTableView().getItems().get(row);
+                    String newDate = datePicker.getValue().toString();
+                    item.setTradeDate(newDate);
+                    commitEdit(newDate);
+                });
+                setGraphic(datePicker);
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            }
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                }else {
+                    datePicker.setValue(java.time.LocalDate.parse(item));
+                    setGraphic(datePicker);
+                }
+            }
+            @Override
+            public void startEdit() {
+                super.startEdit();
+                datePicker.requestFocus();
+            }
+        });
+    }
+
+    @FXML
+    public void OnClickSave() {
+        List<TradeEntryDTO> trade = tradeData.stream()
+                .map(entry -> new TradeEntryDTO(
+                        entry.getTradeNo(),
+                        entry.getCode(),
+                        entry.getName(),
+                        entry.getTradeDate(),
+                        entry.getSide(),
+                        entry.getTradePrice(),
+                        entry.getQuantity()
+                ))
+                .toList();
+
+        for( var v : trade) {
+            System.out.println(v);
+        }
+    }
+}
