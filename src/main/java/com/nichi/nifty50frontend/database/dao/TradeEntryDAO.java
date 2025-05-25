@@ -39,7 +39,7 @@ public class TradeEntryDAO {
         List<TradeList> tradeLists = null;
 
         try {
-            Query<TradeList> query = session.createQuery("FROM TradeList", TradeList.class);
+            Query<TradeList> query = session.createQuery("FROM TradeList order by tradeNo asc", TradeList.class);
             tradeLists = query.list();
         }catch (Exception e) {
             System.out.println(e.getMessage());

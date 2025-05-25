@@ -188,7 +188,7 @@ public class TradeEntryController {
                 datePicker.setOnAction(event -> {
                     int row = getIndex();
                     TableTradeEntry item = getTableView().getItems().get(row);
-                    String newDate = datePicker.getValue().toString();
+                    String newDate = datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
                     item.setTradeDate(newDate);
                     commitEdit(newDate);
                 });
@@ -202,7 +202,7 @@ public class TradeEntryController {
                     setGraphic(null);
                 }else {
                     try {
-                        datePicker.setValue(java.time.LocalDate.parse(item));
+                        datePicker.setValue(java.time.LocalDate.parse(item, java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")));
                     }catch (Exception e) {
                         datePicker.setValue(null);
                     }
