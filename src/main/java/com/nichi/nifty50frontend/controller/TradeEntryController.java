@@ -240,6 +240,27 @@ public class TradeEntryController {
 
     }
 
+    @FXML
+    public void OnClickLoad() {
+        TradeEntryDAO tradeEntryDAO = new TradeEntryDAO();
+        List<TradeList> tradeLists = tradeEntryDAO.getAllTradeList();
+
+        tradeData.clear();
+
+        for (TradeList trade : tradeLists) {
+            TableTradeEntry entry = new TableTradeEntry(
+                    trade.getTradeNo(),
+                    trade.getCode(),
+                    trade.getName(),
+                    trade.getTradeDate(),
+                    trade.getSide(),
+                    trade.getTradePrice(),
+                    trade.getQuantity()
+            );
+            tradeData.add(entry);
+        }
+    }
+
     private String getDateTime() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         return dateFormat.format(new Date()).toLowerCase();

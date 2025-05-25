@@ -4,15 +4,17 @@ import com.nichi.nifty50frontend.database.model.TradeList;
 import com.nichi.nifty50frontend.database.utils.HibernateUtils;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.util.List;
 
 public class TradeEntryDAO {
 
     public void saveAll(List<TradeList> tradeLists) {
+        Session session = HibernateUtils.getSessionFactory().openSession();
         Transaction transaction = null;
 
-        try(Session session = HibernateUtils.getSessionFactory().openSession()) {
+        try {
             transaction = session.beginTransaction();
 
             for (TradeList trade : tradeLists) {
@@ -20,9 +22,29 @@ public class TradeEntryDAO {
             }
 
             transaction.commit();
+
         }catch (Exception e) {
             if (transaction != null) transaction.rollback();
             System.out.println(e.getMessage());
+
+        }finally {
+            session.close();
+
         }
+    }
+
+    public List<TradeList> getAllTradeList() {
+        Session session = HibernateUtils.getSessionFactory().openSession();
+        List<TradeList> tradeLists = null;
+
+        try {
+            Query<TradeList> query = session.createQuery("FROM TradeList", TradeList.class);
+            tradeLists = query.list();
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }finally {
+            session.close();
+        }
+        return tradeLists;
     }
 }

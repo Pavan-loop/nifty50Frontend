@@ -19,7 +19,7 @@
             </columns>
         </TableView>
       <Button fx:id="saveBtn" layoutX="830.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickSave" prefHeight="25.0" prefWidth="81.0" text="Save" />
-      <Button fx:id="saveBtn1" layoutX="737.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickSave" prefHeight="25.0" prefWidth="81.0" text="Load" />
+      <Button fx:id="loadBtn" layoutX="737.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickLoad" prefHeight="25.0" prefWidth="81.0" text="Load" />
     </children>
 
 </AnchorPane>
