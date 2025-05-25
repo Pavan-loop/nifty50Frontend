@@ -1,5 +1,6 @@
 package com.nichi.nifty50frontend;
 
+import com.nichi.nifty50frontend.database.utils.HibernateUtils;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -24,6 +25,7 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
+        HibernateUtils.connectToDatabase();
         launch();
     }
 }

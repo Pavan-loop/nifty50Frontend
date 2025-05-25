@@ -1,6 +1,11 @@
 package com.nichi.nifty50frontend.controller;
 
 import com.nichi.nifty50frontend.DTO.TradeEntryDTO;
+import com.nichi.nifty50frontend.database.dao.StockListDAO;
+import com.nichi.nifty50frontend.database.dao.TradeEntryDAO;
+import com.nichi.nifty50frontend.database.model.StocksList;
+import com.nichi.nifty50frontend.database.model.TradeList;
+import com.nichi.nifty50frontend.database.model.TradeListId;
 import com.nichi.nifty50frontend.model.TableTradeEntry;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -14,7 +19,11 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TradeEntryController {
 
@@ -46,13 +55,41 @@ public class TradeEntryController {
         tableTradeEntry.setItems(tradeData);
         tableTradeEntry.setEditable(true);
 
+        StockListDAO stockListDAO = new StockListDAO();
+        List<StocksList> stocksLists = stockListDAO.getAllStockList();
+        ObservableList<String> stocksCode = FXCollections.observableArrayList();
+        for (var stocks : stocksLists) {
+            stocksCode.add(stocks.getCodeId());
+        }
+
+        Map<String, String> codeToName = stocksLists.stream()
+                        .collect(Collectors.toMap(StocksList::getCodeId, StocksList::getName));
+
         colTradeNo.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTradeNo()).asObject());
         colTradeNo.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
         colTradeNo.setOnEditCommit(event -> event.getRowValue().setTradeNo(event.getNewValue()));
 
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
-        colCode.setCellFactory(ComboBoxTableCell.forTableColumn("TATA", "HCL"));
-        colCode.setOnEditCommit(event -> event.getRowValue().setCode(event.getNewValue()));
+        colCode.setCellFactory(ComboBoxTableCell.forTableColumn(stocksCode));
+        colCode.setOnEditCommit(event -> {
+            TableTradeEntry row = event.getRowValue();
+            String selectedRow = event.getNewValue();
+
+            row.setCode(selectedRow);
+
+            String name = codeToName.getOrDefault(selectedRow, "");
+            row.setName(name);
+
+            if (row.getTradeNo() == 0) {
+                int maxTradeNo = tradeData.stream()
+                        .mapToInt(TableTradeEntry::getTradeNo)
+                        .max()
+                        .orElse(0);
+                row.setTradeNo(maxTradeNo + 1);
+            }
+
+            tableTradeEntry.refresh();
+        });
 
         colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
         colName.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -106,7 +143,7 @@ public class TradeEntryController {
             tableTradeEntry.scrollTo(newIndex);
             tableTradeEntry.getSelectionModel().select(newIndex);
             tableTradeEntry.layout();
-            tableTradeEntry.edit(newIndex, colTradeNo);  // start editing first column in new row
+            tableTradeEntry.edit(newIndex, colTradeNo);
         });
 
         MenuItem deleteItem = new MenuItem("Delete");
@@ -162,7 +199,11 @@ public class TradeEntryController {
                 if (empty || item == null) {
                     setGraphic(null);
                 }else {
-                    datePicker.setValue(java.time.LocalDate.parse(item));
+                    try {
+                        datePicker.setValue(java.time.LocalDate.parse(item));
+                    }catch (Exception e) {
+                        datePicker.setValue(null);
+                    }
                     setGraphic(datePicker);
                 }
             }
@@ -176,20 +217,31 @@ public class TradeEntryController {
 
     @FXML
     public void OnClickSave() {
-        List<TradeEntryDTO> trade = tradeData.stream()
-                .map(entry -> new TradeEntryDTO(
+        List<TradeList> trade = tradeData.stream()
+                .map(entry -> new TradeList(
                         entry.getTradeNo(),
                         entry.getCode(),
                         entry.getName(),
                         entry.getTradeDate(),
                         entry.getSide(),
                         entry.getTradePrice(),
-                        entry.getQuantity()
+                        entry.getQuantity(),
+                        "tradeentrytool",
+                        getDateTime()
                 ))
                 .toList();
+
+        TradeEntryDAO tradeEntryDAO = new TradeEntryDAO();
+        tradeEntryDAO.saveAll(trade);
 
         for( var v : trade) {
             System.out.println(v);
         }
+
+    }
+
+    private String getDateTime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        return dateFormat.format(new Date()).toLowerCase();
     }
 }
