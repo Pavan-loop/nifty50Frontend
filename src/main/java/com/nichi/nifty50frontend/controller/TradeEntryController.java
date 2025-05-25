@@ -174,6 +174,8 @@ public class TradeEntryController {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Deleted Selected row?", ButtonType.YES, ButtonType.NO);
                 alert.showAndWait().ifPresent(response -> {
                     if (response == ButtonType.YES){
+                        TradeEntryDAO tradeEntryDAO = new TradeEntryDAO();
+                        tradeEntryDAO.deleteTrade(selected.getTradeNo(), selected.getCode());
                         tradeData.remove(selected);
                     }
                 });
