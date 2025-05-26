@@ -4,28 +4,28 @@ import jakarta.persistence.*;
 
 @Entity
 @IdClass(TradeListId.class)
-@Table(name = "TradeList")
+@Table(name = "TradesList")
 public class TradeList {
 
     @Id
-    @Column(name = "TradeNo")
+    @Column(name = "trade_no")
     private Integer tradeNo;
     @Id
-    @Column(name = "Code")
+    @Column(name = "code")
     private String code;
-    @Column(name = "Name")
+    @Column(name = "name")
     private String name;
-    @Column(name = "TradeDate")
+    @Column(name = "trade_date")
     private String tradeDate;
     @Column(name = "Side")
     private String side;
-    @Column(name = "TradePrice")
+    @Column(name = "trade_price")
     private Integer tradePrice;
-    @Column(name = "Quantity")
+    @Column(name = "quantity")
     private Integer quantity;
-    @Column(name = "UpdateSource")
+    @Column(name = "update_source")
     private String updateSource;
-    @Column(name = "UpdateTime")
+    @Column(name = "update_time")
     private String updateTime;
 
     public TradeList() {

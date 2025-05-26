@@ -13,11 +13,11 @@ public class StocksList {
     @Column(name = "name")
     private String name;
     @Id
-    @Column(name = "maket")
+    @Column(name = "market")
     private String market;
-    @Column(name = "updatesource")
+    @Column(name = "update_source")
     private String updateSource;
-    @Column(name = "updatetime")
+    @Column(name = "update_time")
     private String updateTime;
 
     public StocksList() {

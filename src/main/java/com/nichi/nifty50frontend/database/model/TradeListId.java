@@ -15,18 +15,18 @@ public class TradeListId implements Serializable {
         this.code = code;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TradeListId)) return false;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof TradeListId)) return false;
 
-        TradeListId that = (TradeListId) o;
-        return Objects.equals(tradeNo, that.tradeNo) &&
-                Objects.equals(code, that.code);
-    }
+            TradeListId that = (TradeListId) o;
+            return Objects.equals(tradeNo, that.tradeNo) &&
+                    Objects.equals(code, that.code);
+        }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(tradeNo, code);
-    }
+        @Override
+        public int hashCode() {
+            return Objects.hash(tradeNo, code);
+        }
 }

@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
@@ -47,23 +48,40 @@ public class TradeEntryController {
     @FXML
     private TableColumn<TableTradeEntry, Integer> colQuantity;
 
+    @FXML
+    private ComboBox<String> filterComboBox;
+
+
+
     private final ObservableList<TableTradeEntry> tradeData = FXCollections.observableArrayList();
+    private final FilteredList<TableTradeEntry> filteredData = new FilteredList<>(tradeData, p -> true);
 
     @FXML
     public void initialize() {
         tableTradeEntry.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        tableTradeEntry.setItems(tradeData);
+        tableTradeEntry.setItems(filteredData);
         tableTradeEntry.setEditable(true);
 
         StockListDAO stockListDAO = new StockListDAO();
         List<StocksList> stocksLists = stockListDAO.getAllStockList();
         ObservableList<String> stocksCode = FXCollections.observableArrayList();
+        stocksCode.add("All");
         for (var stocks : stocksLists) {
             stocksCode.add(stocks.getCodeId());
         }
 
         Map<String, String> codeToName = stocksLists.stream()
                         .collect(Collectors.toMap(StocksList::getCodeId, StocksList::getName));
+
+        filterComboBox.setItems(stocksCode);
+        filterComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            filteredData.setPredicate(entry -> {
+                if (newVal == null || newVal.isEmpty() || newVal.equals("All")) {
+                    return true;
+                }
+                return entry.getCode().equals(newVal);
+            });
+        });
 
         colTradeNo.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTradeNo()).asObject());
         colTradeNo.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
@@ -79,14 +97,6 @@ public class TradeEntryController {
 
             String name = codeToName.getOrDefault(selectedRow, "");
             row.setName(name);
-
-            if (row.getTradeNo() == 0) {
-                int maxTradeNo = tradeData.stream()
-                        .mapToInt(TableTradeEntry::getTradeNo)
-                        .max()
-                        .orElse(0);
-                row.setTradeNo(maxTradeNo + 1);
-            }
 
             tableTradeEntry.refresh();
         });
@@ -104,7 +114,15 @@ public class TradeEntryController {
 
         colTradePrice.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTradePrice()).asObject());
         colTradePrice.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
-        colTradePrice.setOnEditCommit(event -> event.getRowValue().setTradePrice(event.getNewValue()));
+        colTradePrice.setOnEditCommit(event -> {
+            try {
+                int newValue = Integer.parseInt(event.getNewValue().toString());
+                event.getRowValue().setTradePrice(newValue);
+            }catch (NumberFormatException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Show only contain numbers");
+                alert.show();
+            }
+        });
 
         colQuantity.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getQuantity()).asObject());
         colQuantity.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
@@ -137,13 +155,20 @@ public class TradeEntryController {
 
         MenuItem addItem = new MenuItem("Add");
         addItem.setOnAction(e -> {
-            TableTradeEntry newEntry = new TableTradeEntry(0, "", "", "", "", 0, 0);
+            int maxTradeNo = tradeData.stream()
+                    .mapToInt(TableTradeEntry::getTradeNo)
+                    .max()
+                    .orElse(0);
+            int nextTradeNo = maxTradeNo + 1;
+
+            TableTradeEntry newEntry = new TableTradeEntry(nextTradeNo, "", "", "", "", 0, 0);
             tradeData.add(newEntry);
             int newIndex = tradeData.size() - 1;
             tableTradeEntry.scrollTo(newIndex);
             tableTradeEntry.getSelectionModel().select(newIndex);
             tableTradeEntry.layout();
             tableTradeEntry.edit(newIndex, colTradeNo);
+
         });
 
         MenuItem deleteItem = new MenuItem("Delete");
@@ -219,6 +244,12 @@ public class TradeEntryController {
 
     @FXML
     public void OnClickSave() {
+
+        for (TableTradeEntry entry : tradeData) {
+            if (!isValid(entry)){
+                return;
+            }
+        }
         List<TradeList> trade = tradeData.stream()
                 .map(entry -> new TradeList(
                         entry.getTradeNo(),
@@ -261,10 +292,40 @@ public class TradeEntryController {
             );
             tradeData.add(entry);
         }
+        filterComboBox.setValue("All");
     }
 
     private String getDateTime() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         return dateFormat.format(new Date()).toLowerCase();
+    }
+
+    private boolean isValid (TableTradeEntry entry) {
+        StringBuilder error = new StringBuilder();
+
+        if (entry.getCode() == null || entry.getCode().isEmpty()) {
+            error.append("code is required!");
+        }
+        if (entry.getSide() == null || (!entry.getSide().equals("B") && !entry.getSide().equals("S"))) {
+            error.append("Side must be B or S \n");
+        }
+        if (entry.getTradeDate() == null || entry.getTradeDate().isEmpty()) {
+            error.append("Date should be selected \n");
+        }
+        if (entry.getTradePrice() <= 0) {
+            error.append("Enter a valid Trade price \n");
+        }
+        if (entry.getQuantity() <= 0) {
+            error.append("Enter a valid Quantity \n");
+        }
+        if (!error.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Validation Error");
+            alert.setHeaderText("Invalid Trade entry: Trade no: " + entry.getTradeNo());
+            alert.setContentText(error.toString());
+            alert.showAndWait();
+            return false;
+        }
+        return true;
     }
 }
