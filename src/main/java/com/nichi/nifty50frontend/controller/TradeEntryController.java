@@ -1,11 +1,11 @@
 package com.nichi.nifty50frontend.controller;
 
-import com.nichi.nifty50frontend.DTO.TradeEntryDTO;
+
+import com.nichi.nifty50frontend.DTO.ComboDataDTO;
 import com.nichi.nifty50frontend.database.dao.StockListDAO;
 import com.nichi.nifty50frontend.database.dao.TradeEntryDAO;
 import com.nichi.nifty50frontend.database.model.StocksList;
 import com.nichi.nifty50frontend.database.model.TradeList;
-import com.nichi.nifty50frontend.database.model.TradeListId;
 import com.nichi.nifty50frontend.model.TableTradeEntry;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -58,6 +58,7 @@ public class TradeEntryController {
 
     @FXML
     public void initialize() {
+        OnClickLoad();
         tableTradeEntry.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableTradeEntry.setItems(filteredData);
         tableTradeEntry.setEditable(true);
@@ -65,7 +66,14 @@ public class TradeEntryController {
         StockListDAO stockListDAO = new StockListDAO();
         List<StocksList> stocksLists = stockListDAO.getAllStockList();
         ObservableList<String> stocksCode = FXCollections.observableArrayList();
-        stocksCode.add("All");
+        ObservableList<String> filteredCodeData = FXCollections.observableArrayList();
+        filteredCodeData.add("All");
+        TradeEntryDAO tradeEntryDAO = new TradeEntryDAO();
+        List<ComboDataDTO> combo = tradeEntryDAO.getCodeData();
+        for (var stocks : combo) {
+            filteredCodeData.add(stocks.getCode());
+            System.out.println(stocks);
+        }
         for (var stocks : stocksLists) {
             stocksCode.add(stocks.getCodeId());
         }
@@ -73,7 +81,7 @@ public class TradeEntryController {
         Map<String, String> codeToName = stocksLists.stream()
                         .collect(Collectors.toMap(StocksList::getCodeId, StocksList::getName));
 
-        filterComboBox.setItems(stocksCode);
+        filterComboBox.setItems(filteredCodeData);
         filterComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             filteredData.setPredicate(entry -> {
                 if (newVal == null || newVal.isEmpty() || newVal.equals("All")) {
@@ -199,7 +207,6 @@ public class TradeEntryController {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Deleted Selected row?", ButtonType.YES, ButtonType.NO);
                 alert.showAndWait().ifPresent(response -> {
                     if (response == ButtonType.YES){
-                        TradeEntryDAO tradeEntryDAO = new TradeEntryDAO();
                         tradeEntryDAO.deleteTrade(selected.getTradeNo(), selected.getCode());
                         tradeData.remove(selected);
                     }
@@ -213,7 +220,13 @@ public class TradeEntryController {
                 datePicker.setOnAction(event -> {
                     int row = getIndex();
                     TableTradeEntry item = getTableView().getItems().get(row);
-                    String newDate = datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+                    String newDate = "";
+                    try {
+                        newDate = datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+                    }catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+
                     item.setTradeDate(newDate);
                     commitEdit(newDate);
                 });
@@ -270,7 +283,7 @@ public class TradeEntryController {
         for( var v : trade) {
             System.out.println(v);
         }
-
+        OnClickLoad();
     }
 
     @FXML
@@ -293,6 +306,11 @@ public class TradeEntryController {
             tradeData.add(entry);
         }
         filterComboBox.setValue("All");
+
+        List<ComboDataDTO> value = tradeEntryDAO.getCodeData();
+        for (var v : value) {
+            System.out.println(v);
+        }
     }
 
     private String getDateTime() {
@@ -304,19 +322,19 @@ public class TradeEntryController {
         StringBuilder error = new StringBuilder();
 
         if (entry.getCode() == null || entry.getCode().isEmpty()) {
-            error.append("code is required!");
+            error.append("Code : code is required! \n");
         }
         if (entry.getSide() == null || (!entry.getSide().equals("B") && !entry.getSide().equals("S"))) {
-            error.append("Side must be B or S \n");
+            error.append("Side : Side must be B or S \n");
         }
         if (entry.getTradeDate() == null || entry.getTradeDate().isEmpty()) {
-            error.append("Date should be selected \n");
+            error.append("Date : Date should be selected \n");
         }
         if (entry.getTradePrice() <= 0) {
-            error.append("Enter a valid Trade price \n");
+            error.append("Trade Price : Enter a valid Trade price \n");
         }
         if (entry.getQuantity() <= 0) {
-            error.append("Enter a valid Quantity \n");
+            error.append("Trade Quantity : Enter a valid Quantity \n");
         }
         if (!error.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);

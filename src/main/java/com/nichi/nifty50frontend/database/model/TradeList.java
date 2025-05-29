@@ -2,30 +2,32 @@ package com.nichi.nifty50frontend.database.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @IdClass(TradeListId.class)
 @Table(name = "TradesList")
 public class TradeList {
 
     @Id
-    @Column(name = "trade_no")
+    @Column(name = "tradeno")
     private Integer tradeNo;
     @Id
     @Column(name = "code")
     private String code;
     @Column(name = "name")
     private String name;
-    @Column(name = "trade_date")
+    @Column(name = "tradedate")
     private String tradeDate;
-    @Column(name = "Side")
+    @Column(name = "side")
     private String side;
-    @Column(name = "trade_price")
+    @Column(name = "tradeprice")
     private Integer tradePrice;
     @Column(name = "quantity")
     private Integer quantity;
-    @Column(name = "update_source")
+    @Column(name = "updatesource")
     private String updateSource;
-    @Column(name = "update_time")
+    @Column(name = "updatetime")
     private String updateTime;
 
     public TradeList() {

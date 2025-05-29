@@ -65,4 +65,18 @@
     -fx-background-radius: 10px 10px 0 0;
 }
 
+.btnloadandsave {
+    -fx-background-color: #606CCB;
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 8px;
+}
+
+.comboboxstyle {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: gray;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px;
+}
+
 

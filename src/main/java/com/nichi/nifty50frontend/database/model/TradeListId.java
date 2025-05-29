@@ -20,6 +20,7 @@ public class TradeListId implements Serializable {
             if (this == o) return true;
             if (!(o instanceof TradeListId)) return false;
 
+
             TradeListId that = (TradeListId) o;
             return Objects.equals(tradeNo, that.tradeNo) &&
                     Objects.equals(code, that.code);

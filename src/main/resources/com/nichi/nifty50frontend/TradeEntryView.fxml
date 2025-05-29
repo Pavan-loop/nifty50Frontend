@@ -19,9 +19,9 @@
                 <TableColumn fx:id="colQuantity" text="Quantity" />
             </columns>
         </TableView>
-      <Button fx:id="saveBtn" layoutX="830.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickSave" prefHeight="25.0" prefWidth="81.0" text="Save" />
-      <Button fx:id="loadBtn" layoutX="737.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickLoad" prefHeight="25.0" prefWidth="81.0" text="Load" />
-      <ComboBox fx:id="filterComboBox" promptText="Filter by code" layoutX="24.0" layoutY="23.0" prefWidth="150.0" />
+      <Button fx:id="saveBtn" layoutX="870.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickSave" prefHeight="25.0" prefWidth="81.0" styleClass="btnloadandsave" stylesheets="@../../../css/stylesheet.css" text="Save" />
+      <Button fx:id="loadBtn" layoutX="765.0" layoutY="23.0" mnemonicParsing="false" onAction="#OnClickLoad" prefHeight="25.0" prefWidth="81.0" styleClass="btnloadandsave" stylesheets="@../../../css/stylesheet.css" text="Load" />
+      <ComboBox fx:id="filterComboBox" layoutX="4.0" layoutY="22.0" prefWidth="150.0" promptText="Filter by code" styleClass="comboboxstyle" stylesheets="@../../../css/stylesheet.css" />
     </children>
 
 </AnchorPane>

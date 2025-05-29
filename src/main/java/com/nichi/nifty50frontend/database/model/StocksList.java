@@ -15,9 +15,9 @@ public class StocksList {
     @Id
     @Column(name = "market")
     private String market;
-    @Column(name = "update_source")
+    @Column(name = "updatesource")
     private String updateSource;
-    @Column(name = "update_time")
+    @Column(name = "updatetime")
     private String updateTime;
 
     public StocksList() {

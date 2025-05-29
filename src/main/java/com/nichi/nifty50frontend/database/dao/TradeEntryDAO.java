@@ -1,5 +1,6 @@
 package com.nichi.nifty50frontend.database.dao;
 
+import com.nichi.nifty50frontend.DTO.ComboDataDTO;
 import com.nichi.nifty50frontend.database.model.TradeList;
 import com.nichi.nifty50frontend.database.model.TradeListId;
 import com.nichi.nifty50frontend.database.utils.HibernateUtils;
@@ -7,6 +8,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TradeEntryDAO {
@@ -71,5 +73,22 @@ public class TradeEntryDAO {
         }finally {
             session.close();
         }
+    }
+
+    public List<ComboDataDTO> getCodeData() {
+        Session session = HibernateUtils.getSessionFactory().openSession();
+        String selectDistinctCode = "SELECT DISTINCT code FROM tradeslist";
+        List<ComboDataDTO> combo = new ArrayList<>();
+        try {
+            List<String> codes = session.createNativeQuery(selectDistinctCode).getResultList();
+            for (String v : codes) {
+                combo.add(new ComboDataDTO(v));
+            }
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }finally {
+            session.close();
+        }
+        return combo;
     }
 }
