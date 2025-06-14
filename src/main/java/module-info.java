@@ -7,6 +7,7 @@ module com.nichi.nifty50frontend {
     requires jakarta.persistence;
     requires org.hibernate.orm.core;
     requires java.sql;
+    requires jdk.compiler;
 
     opens com.nichi.nifty50frontend to javafx.fxml, org.hibernate.orm.core;
     opens com.nichi.nifty50frontend.controller to javafx.fxml;

@@ -10,7 +10,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="580.0" prefWidth="1000.0" styleClass="parent" stylesheets="@../../../css/stylesheet.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.nichi.nifty50frontend.HelloController">
    <children>
-      <Pane prefHeight="50.0" prefWidth="1000.0" styleClass="main-heading" stylesheets="@../../../css/stylesheet.css">
+      <Pane prefHeight="50.0" maxWidth="-Infinity" styleClass="main-heading" stylesheets="@../../../css/stylesheet.css">
          <children>
             <Label layoutX="163.0" layoutY="11.0" prefHeight="29.0" prefWidth="157.0" styleClass="heading" stylesheets="@../../../css/stylesheet.css" text=" NichiIn PL Monitor Tool" textFill="#030303">
                <font>

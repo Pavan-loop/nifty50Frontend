@@ -22,7 +22,7 @@ public class TradeList {
     @Column(name = "side")
     private String side;
     @Column(name = "tradeprice")
-    private Integer tradePrice;
+    private Double tradePrice;
     @Column(name = "quantity")
     private Integer quantity;
     @Column(name = "updatesource")
@@ -33,7 +33,7 @@ public class TradeList {
     public TradeList() {
     }
 
-    public TradeList(Integer tradeNo, String code, String name, String tradeDate, String side, Integer tradePrice, Integer quantity, String updateSource, String updateTime) {
+    public TradeList(Integer tradeNo, String code, String name, String tradeDate, String side, Double tradePrice, Integer quantity, String updateSource, String updateTime) {
         this.tradeNo = tradeNo;
         this.code = code;
         this.name = name;
@@ -85,11 +85,11 @@ public class TradeList {
         this.side = side;
     }
 
-    public Integer getTradePrice() {
+    public Double getTradePrice() {
         return tradePrice;
     }
 
-    public void setTradePrice(Integer tradePrice) {
+    public void setTradePrice(Double tradePrice) {
         this.tradePrice = tradePrice;
     }
 

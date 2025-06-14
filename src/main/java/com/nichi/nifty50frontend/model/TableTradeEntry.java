@@ -1,5 +1,6 @@
 package com.nichi.nifty50frontend.model;
 
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -9,16 +10,21 @@ public class TableTradeEntry {
     private SimpleStringProperty name;
     private SimpleStringProperty tradeDate;
     private SimpleStringProperty side;
-    private SimpleIntegerProperty tradePrice;
+    private SimpleDoubleProperty tradePrice;
     private SimpleIntegerProperty quantity;
 
-    public TableTradeEntry(Integer tradeNo, String code, String name, String tradeDate, String side, Integer tradePrice, Integer quantity) {
+    private boolean modifiedTradePrice = false;
+    private boolean modifiedQuantity = false;
+    private boolean modifiedSide = false;
+    private boolean modifiedTradeCode = false;
+
+    public TableTradeEntry(Integer tradeNo, String code, String name, String tradeDate, String side, Double tradePrice, Integer quantity) {
         this.tradeNo = new SimpleIntegerProperty(tradeNo);
         this.code = new SimpleStringProperty(code);
         this.name = new SimpleStringProperty(name);
         this.tradeDate = new SimpleStringProperty(tradeDate);
         this.side = new SimpleStringProperty(side);
-        this.tradePrice = new SimpleIntegerProperty(tradePrice);
+        this.tradePrice = new SimpleDoubleProperty(tradePrice);
         this.quantity = new SimpleIntegerProperty(quantity);
     }
 
@@ -62,11 +68,11 @@ public class TableTradeEntry {
         return side;
     }
 
-    public Integer getTradePrice() {
+    public Double getTradePrice() {
         return tradePrice.get();
     }
 
-    public SimpleIntegerProperty tradePriceProperty() {
+    public SimpleDoubleProperty tradePriceProperty() {
         return tradePrice;
     }
 
@@ -98,12 +104,44 @@ public class TableTradeEntry {
         this.side.set(side);
     }
 
-    public void setTradePrice(int tradePrice) {
+    public void setTradePrice(double tradePrice) {
         this.tradePrice.set(tradePrice);
     }
 
     public void setQuantity(int quantity) {
         this.quantity.set(quantity);
+    }
+
+    public boolean isModifiedTradePrice() {
+        return modifiedTradePrice;
+    }
+
+    public void setModifiedTradePrice(boolean modified) {
+        this.modifiedTradePrice = modified;
+    }
+
+    public boolean isModifiedQuantity() {
+        return modifiedQuantity;
+    }
+
+    public void setModifiedQuantity(boolean modifiedQuantity) {
+        this.modifiedQuantity = modifiedQuantity;
+    }
+
+    public boolean isModifiedSide() {
+        return modifiedSide;
+    }
+
+    public void setModifiedSide(boolean modifiedSide) {
+        this.modifiedSide = modifiedSide;
+    }
+
+    public boolean isModifiedTradeCode() {
+        return modifiedTradeCode;
+    }
+
+    public void setModifiedTradeCode(boolean modifiedTradeCode) {
+        this.modifiedTradeCode = modifiedTradeCode;
     }
 
     @Override

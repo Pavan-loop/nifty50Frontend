@@ -8,19 +8,26 @@ import com.nichi.nifty50frontend.database.model.StocksList;
 import com.nichi.nifty50frontend.database.model.TradeList;
 import com.nichi.nifty50frontend.model.TableTradeEntry;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.util.Callback;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +51,7 @@ public class TradeEntryController {
     @FXML
     private TableColumn<TableTradeEntry, String> colSide;
     @FXML
-    private TableColumn<TableTradeEntry, Integer> colTradePrice;
+    private TableColumn<TableTradeEntry, Double> colTradePrice;
     @FXML
     private TableColumn<TableTradeEntry, Integer> colQuantity;
 
@@ -57,36 +64,33 @@ public class TradeEntryController {
     private final FilteredList<TableTradeEntry> filteredData = new FilteredList<>(tradeData, p -> true);
 
     @FXML
-    public void initialize() {
+    public void initialize() throws Exception {
         OnClickLoad();
         tableTradeEntry.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableTradeEntry.setItems(filteredData);
         tableTradeEntry.setEditable(true);
 
+
+
         StockListDAO stockListDAO = new StockListDAO();
         List<StocksList> stocksLists = stockListDAO.getAllStockList();
         ObservableList<String> stocksCode = FXCollections.observableArrayList();
-        ObservableList<String> filteredCodeData = FXCollections.observableArrayList();
-        filteredCodeData.add("All");
         TradeEntryDAO tradeEntryDAO = new TradeEntryDAO();
-        List<ComboDataDTO> combo = tradeEntryDAO.getCodeData();
-        for (var stocks : combo) {
-            filteredCodeData.add(stocks.getCode());
-            System.out.println(stocks);
-        }
         for (var stocks : stocksLists) {
             stocksCode.add(stocks.getCodeId());
         }
 
         Map<String, String> codeToName = stocksLists.stream()
                         .collect(Collectors.toMap(StocksList::getCodeId, StocksList::getName));
+        String getValue = "";
 
-        filterComboBox.setItems(filteredCodeData);
+        filterComboBox.setItems(stocksCode);
         filterComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             filteredData.setPredicate(entry -> {
                 if (newVal == null || newVal.isEmpty() || newVal.equals("All")) {
                     return true;
                 }
+                tableTradeEntry.setPlaceholder(new Label("No data available for code: " + newVal));
                 return entry.getCode().equals(newVal);
             });
         });
@@ -96,45 +100,161 @@ public class TradeEntryController {
         colTradeNo.setOnEditCommit(event -> event.getRowValue().setTradeNo(event.getNewValue()));
 
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
-        colCode.setCellFactory(ComboBoxTableCell.forTableColumn(stocksCode));
+        colCode.setCellFactory(column -> {
+            ComboBoxTableCell<TableTradeEntry, String> cell =
+                    new ComboBoxTableCell<>(stocksCode);
+            cell.itemProperty().addListener((obs, oldValue, newValue) -> {
+                try {
+                    TableTradeEntry trade = cell.getTableRow().getItem();
+                    if (trade != null && trade.isModifiedTradeCode()) {
+                        cell.setStyle("-fx-background-color: #ffdfd5; -fx-text-fill: black; -fx-border-color: red;");
+                    }else {
+                        cell.setStyle("");
+                    }
+                }catch (Exception e){}
+            });
+            return cell;
+        });
         colCode.setOnEditCommit(event -> {
             TableTradeEntry row = event.getRowValue();
+            String oldRow = event.getOldValue();
             String selectedRow = event.getNewValue();
 
-            row.setCode(selectedRow);
-
-            String name = codeToName.getOrDefault(selectedRow, "");
-            row.setName(name);
-
-            tableTradeEntry.refresh();
+            if (!oldRow.equals(selectedRow) && !oldRow.isEmpty()) {
+                row.setCode(selectedRow);
+                row.setModifiedTradeCode(true);
+                String name = codeToName.getOrDefault(selectedRow, "");
+                row.setName(name);
+                tableTradeEntry.refresh();
+            } else if (oldRow.isEmpty()) {
+                row.setCode(selectedRow);
+                String name = codeToName.getOrDefault(selectedRow, "");
+                row.setName(name);
+                tableTradeEntry.refresh();
+            }
         });
 
         colName.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
-        colName.setCellFactory(TextFieldTableCell.forTableColumn());
+        colName.setCellFactory(column -> {
+            TextFieldTableCell<TableTradeEntry, String> cell =
+                    new TextFieldTableCell<>();
+            cell.itemProperty().addListener((cols, oldValue, newValue) -> {
+                try {
+                    TableTradeEntry trade = cell.getTableRow().getItem();
+                    if (trade != null && trade.isModifiedTradeCode()) {
+                        cell.setStyle("-fx-background-color: #ffdfd5; -fx-text-fill: black; -fx-border-color: red;");
+                    } else {
+                        cell.setStyle("");
+                    }
+                }catch (Exception e) {}
+            });
+            return cell;
+        });
         colName.setOnEditCommit(event -> event.getRowValue().setName(event.getNewValue()));
 
         colTradeDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTradeDate()));
         colTradeDate.setOnEditCommit(event -> event.getRowValue().setTradeDate(event.getNewValue()));
 
+        colSide.setEditable(true);
         colSide.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getSide()));
-        colSide.setCellFactory(ComboBoxTableCell.forTableColumn("B","S"));
-        colSide.setOnEditCommit(event -> event.getRowValue().setSide(event.getNewValue()));
+        colSide.setCellFactory(column -> {
+            ComboBoxTableCell<TableTradeEntry, String> cell =
+                    new ComboBoxTableCell<>("B", "S");
+            cell.itemProperty().addListener((obs, oldValue, newValue) -> {
+                try {
+                    TableTradeEntry trade = cell.getTableRow().getItem();
+                    if (trade != null && trade.isModifiedSide()) {
+                        cell.setStyle("-fx-background-color: #ffdfd5; -fx-text-fill: black; -fx-border-color: red;");
+                    }else {
+                        cell.setStyle("");
+                    }
+                }catch (Exception e){}
+            });
+            return cell;
+        });
+        colSide.setOnEditCommit(event -> {
+            TableTradeEntry trade = event.getRowValue();
+            String oldValue = event.getOldValue();
+            String newValue = event.getNewValue();
 
-        colTradePrice.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getTradePrice()).asObject());
-        colTradePrice.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
-        colTradePrice.setOnEditCommit(event -> {
-            try {
-                int newValue = Integer.parseInt(event.getNewValue().toString());
-                event.getRowValue().setTradePrice(newValue);
-            }catch (NumberFormatException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Show only contain numbers");
-                alert.show();
+            if (!oldValue.equals(newValue) && !oldValue.isEmpty()) {
+                trade.setSide(newValue);
+                trade.setModifiedSide(true);
+                tableTradeEntry.refresh();
+            } else if (oldValue.isEmpty()) {
+                trade.setSide(newValue);
+                tableTradeEntry.refresh();
             }
         });
 
+        colTradePrice.setEditable(true);
+        colTradePrice.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getTradePrice()).asObject());
+        colTradePrice.setCellFactory(column -> {
+            TextFieldTableCell<TableTradeEntry, Double> cell =
+                    new TextFieldTableCell<>(new DoubleStringConverter());
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                try {
+                    TableTradeEntry trade = cell.getTableRow().getItem();
+                    if (trade != null && trade.isModifiedTradePrice()) {
+                        cell.setStyle("-fx-background-color: #ffdfd5; -fx-text-fill: black; -fx-border-color: red;");
+                    }else {
+                        cell.setStyle("");
+                    }
+                }catch (Exception e) {
+                }
+            });
+            return cell;
+        });
+        colTradePrice.setOnEditCommit(event -> {
+            TableTradeEntry trade = event.getRowValue();
+            Double oldValue = event.getOldValue();
+            Double newValue = Math.round(event.getNewValue() * 100.0) / 100.0;
+
+
+            if (!oldValue.equals(newValue) && oldValue != 0.0) {
+                trade.setTradePrice(newValue);
+                trade.setModifiedTradePrice(true);
+                tableTradeEntry.refresh();
+            } else if (oldValue == 0.0) {
+                trade.setTradePrice(newValue);
+                tableTradeEntry.refresh();
+            }
+        });
+
+        colQuantity.setEditable(true);
         colQuantity.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getQuantity()).asObject());
-        colQuantity.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
-        colQuantity.setOnEditCommit(event -> event.getRowValue().setQuantity(event.getNewValue()));
+        colQuantity.setCellFactory(column -> {
+            TextFieldTableCell<TableTradeEntry, Integer> cell =
+                    new TextFieldTableCell<>(new IntegerStringConverter());
+
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+                try {
+                    TableTradeEntry trade = cell.getTableRow().getItem();
+                    if (trade != null && trade.isModifiedQuantity()) {
+                        cell.setStyle("-fx-background-color: #ffdfd5; -fx-text-fill: black; -fx-border-color: red;");
+                    }else {
+                        cell.setStyle("");
+                    }
+                }catch (Exception e) {
+                }
+
+            });
+            return cell;
+        });
+        colQuantity.setOnEditCommit(event -> {
+            TableTradeEntry trade = event.getRowValue();
+            Integer oldValue = event.getOldValue();
+            Integer newValue = event.getNewValue();
+
+            if (!oldValue.equals(newValue) && oldValue != 0) {
+                trade.setQuantity(newValue);
+                trade.setModifiedQuantity(true);
+                tableTradeEntry.refresh();
+            }else if (oldValue == 0) {
+                trade.setQuantity(newValue);
+                tableTradeEntry.refresh();
+            }
+        });
 
         tableTradeEntry.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.TAB) {
@@ -169,7 +289,7 @@ public class TradeEntryController {
                     .orElse(0);
             int nextTradeNo = maxTradeNo + 1;
 
-            TableTradeEntry newEntry = new TableTradeEntry(nextTradeNo, "", "", "", "", 0, 0);
+            TableTradeEntry newEntry = new TableTradeEntry(nextTradeNo, "", "", "", "", 0.0, 0);
             tradeData.add(newEntry);
             int newIndex = tradeData.size() - 1;
             tableTradeEntry.scrollTo(newIndex);
@@ -217,6 +337,21 @@ public class TradeEntryController {
         colTradeDate.setCellFactory(column -> new TableCell<TableTradeEntry, String>() {
             private final DatePicker datePicker = new DatePicker();
             {
+                datePicker.setDayCellFactory(new Callback<DatePicker, DateCell>() {
+                    @Override
+                    public DateCell call(DatePicker param) {
+                        return new DateCell() {
+                            @Override
+                            public void updateItem(LocalDate item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (item.isAfter(LocalDate.now())) {
+                                    setDisable(true);
+                                    setCursor(Cursor.DISAPPEAR);
+                                }
+                            }
+                        };
+                    }
+                });
                 datePicker.setOnAction(event -> {
                     int row = getIndex();
                     TableTradeEntry item = getTableView().getItems().get(row);
@@ -244,6 +379,8 @@ public class TradeEntryController {
                     }catch (Exception e) {
                         datePicker.setValue(null);
                     }
+
+                    TableTradeEntry trade = getTableView().getItems().get(getIndex());
                     setGraphic(datePicker);
                 }
             }
